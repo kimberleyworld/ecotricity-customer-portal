@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ResourceCard from "./resourceCard";
-
-type Resource = {
-  id: string;
-  name: string;
-  format: string;
-  url: string;
-  description: string;
-};
+import { Resource } from "../types/resource";
 
 export default function ResourceCards() {
   const [resources, setResources] = useState<Resource[]>([]);
