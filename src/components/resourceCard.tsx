@@ -6,22 +6,20 @@ import ResourceModal from "./resourceModal";
 import { Resource } from "../types/resource";
 import Button from "./button";
 
-export default function ResourceCard({ data }: { data: Resource[] }) {
-  const [downloaded, setDownloaded] = useState<{ [key: string]: boolean }>({});
+export default function ResourceCard({ resource }: { resource: Resource }) {
+  const [downloaded, setDownloaded] = useState(false);
+  const [downloading, setDownloading] = useState(false); // new state
   const [viewedResource, setViewedResource] = useState<Resource | null>(null);
   const [csvRows, setCsvRows] = useState<string[][]>([]);
 
-  const handleDownload = async (resource: Resource) => {
+  const handleDownload = async () => {
+    setDownloading(true);
     try {
       const response = await fetch(resource.url);
-      if (!response.ok) {
-        // Optionally, show an error message to the user
-        console.error(`Failed to download resource: ${response.status} ${response.statusText}`);
-        return;
-      }
+      if (!response.ok) throw new Error("Download failed");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.href = url;
       a.download = resource.name;
@@ -30,59 +28,46 @@ export default function ResourceCard({ data }: { data: Resource[] }) {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      setDownloaded((prev) => ({ ...prev, [resource.id]: true }));
-    } catch (error) {
-      // Optionally, show an error message to the user
-      console.error("Error downloading resource:", error);
+      setDownloaded(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDownloading(false);
     }
   };
 
-  const handleView = async (resource: Resource) => {
+  const handleView = async () => {
     setViewedResource(resource);
-
     if (resource.format.toLowerCase() === "csv") {
-      // Fetch only the first 10,000 bytes for preview
-      // may partially parse that last row,need to handle incomplete rows
-      let response = await fetch(resource.url, {
-        headers: { Range: "bytes=0-10000" }
-      });
-      let text;
-      // If server does not support Range requests, fall back to full request
-      if (response.status === 206) {
-        text = await response.text();
-      } else {
-        // Try full request
-        response = await fetch(resource.url);
-        text = await response.text();
-      }
+      const response = await fetch(resource.url);
+      const text = await response.text();
       const parsed = Papa.parse<string[]>(text, { skipEmptyLines: true });
       setCsvRows(parsed.data);
-      setCsvRows([]); 
+    } else {
+      setCsvRows([]);
     }
   };
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4">Available Datasets</h1>
-      <ul className="space-y-4">
-        {data.map((resource) => (
-          <li key={resource.id} className="p-4 border rounded-lg shadow">
-            <h2 className="font-semibold">{resource.name}</h2>
-            <p className="text-sm text-white">{resource.format}</p>
-            <p className="text-sm text-white">
-              {resource.description?.toString() || ""}
-            </p>
-            <div className="flex gap-2">
-              <Button onClick={() => handleDownload(resource)}>
-                Download
-              </Button>
-              <Button onClick={() => handleView(resource)}>
-                View
-              </Button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="p-4 border text-white flex flex-col justify-between">
+        <div>
+          <h2 className="font-semibold">{resource.name}</h2>
+          <p className="text-sm">{resource.format}</p>
+          <p className="text-sm">{resource.description || ""}</p>
+        </div>
+        <div className="flex gap-2 mt-2">
+          <Button
+            onClick={handleDownload}
+            disabled={downloaded || downloading}
+            bgColor={downloaded ? "bg-gray-400" : undefined}
+          >
+            {downloading ? "Downloading..." : downloaded ? "Downloaded" : "Download"}
+          </Button>
+          <Button onClick={handleView}>View</Button>
+        </div>
+      </div>
+
       <ResourceModal
         resource={viewedResource}
         csvRows={csvRows}
