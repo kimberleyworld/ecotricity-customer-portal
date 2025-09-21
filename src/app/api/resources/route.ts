@@ -5,7 +5,7 @@ export async function GET() {
     const res = await fetch(
       "https://api.neso.energy/api/3/action/package_show?id=embedded-wind-and-solar-forecasts",
       {
-        next: { revalidate: 600 }, // cache for 10 mins then refresh to keep forcast up to date
+        next: { revalidate: 600 }, // cache for 10 mins then refresh to keep forecast up to date
       }
     );
 
