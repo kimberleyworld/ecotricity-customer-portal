@@ -39,10 +39,16 @@ export default function ResourceCard({ resource }: { resource: Resource }) {
   const handleView = async () => {
     setViewedResource(resource);
     if (resource.format.toLowerCase() === "csv") {
-      const response = await fetch(resource.url);
-      const text = await response.text();
-      const parsed = Papa.parse<string[]>(text, { skipEmptyLines: true });
-      setCsvRows(parsed.data);
+      try {
+        const response = await fetch(resource.url);
+        if (!response.ok) throw new Error("Failed to fetch resource for preview");
+        const text = await response.text();
+        const parsed = Papa.parse<string[]>(text, { skipEmptyLines: true });
+        setCsvRows(parsed.data);
+      } catch (err) {
+        console.error("Error fetching resource for preview:", err);
+        setCsvRows([]);
+      }
     } else {
       setCsvRows([]);
     }
