@@ -11,19 +11,29 @@ export default function ResourceCard({ data }: { data: Resource[] }) {
   const [csvRows, setCsvRows] = useState<string[][]>([]);
 
   const handleDownload = async (resource: Resource) => {
-    const response = await fetch(resource.url);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+    try {
+      const response = await fetch(resource.url);
+      if (!response.ok) {
+        // Optionally, show an error message to the user
+        console.error(`Failed to download resource: ${response.status} ${response.statusText}`);
+        return;
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = resource.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = resource.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
 
-    setDownloaded((prev) => ({ ...prev, [resource.id]: true }));
+      setDownloaded((prev) => ({ ...prev, [resource.id]: true }));
+    } catch (error) {
+      // Optionally, show an error message to the user
+      console.error("Error downloading resource:", error);
+    }
   };
 
   const handleView = async (resource: Resource) => {
