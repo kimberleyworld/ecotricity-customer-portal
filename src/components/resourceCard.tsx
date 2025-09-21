@@ -50,7 +50,7 @@ export default function ResourceCard({ resource }: { resource: Resource }) {
 
   return (
     <>
-      <div className="p-4 border text-white flex flex-col justify-between">
+      <div className="p-4 border text-white flex flex-col justify-between max-w-[300px]">
         <div>
           <h2 className="font-semibold">{resource.name}</h2>
           <p className="text-sm">{resource.format}</p>
