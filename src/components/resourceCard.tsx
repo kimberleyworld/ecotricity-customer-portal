@@ -30,10 +30,10 @@ export default function ResourceCard({ data }: { data: Resource[] }) {
     setViewedResource(resource);
 
     if (resource.format.toLowerCase() === "csv") {
-      // Fetch only the first 50,000 bytes for preview
+      // Fetch only the first 10,000 bytes for preview
       // may partially parse that last row,need to handle incomplete rows
       const response = await fetch(resource.url, {
-        headers: { Range: "bytes=0-50000" }
+        headers: { Range: "bytes=0-10000" }
       });
       const text = await response.text();
       const parsed = Papa.parse<string[]>(text, { skipEmptyLines: true });
