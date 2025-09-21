@@ -4,6 +4,7 @@ import { useState } from "react";
 import Papa from "papaparse";
 import ResourceModal from "./resourceModal";
 import { Resource } from "../types/resource";
+import Button from "./button";
 
 export default function ResourceCard({ data }: { data: Resource[] }) {
   const [downloaded, setDownloaded] = useState<{ [key: string]: boolean }>({});
@@ -67,25 +68,17 @@ export default function ResourceCard({ data }: { data: Resource[] }) {
         {data.map((resource) => (
           <li key={resource.id} className="p-4 border rounded-lg shadow">
             <h2 className="font-semibold">{resource.name}</h2>
-            <p className="text-sm text-gray-600">{resource.format}</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-white">{resource.format}</p>
+            <p className="text-sm text-white">
               {resource.description?.toString() || ""}
             </p>
             <div className="flex gap-2">
-              <button
-                className={`inline-block mt-2 hover:underline ${
-                  downloaded[resource.id] ? "text-green-600" : "text-blue-600"
-                }`}
-                onClick={() => handleDownload(resource)}
-              >
+              <Button onClick={() => handleDownload(resource)}>
                 Download
-              </button>
-              <button
-                className="inline-block mt-2 text-purple-600 hover:underline"
-                onClick={() => handleView(resource)}
-              >
+              </Button>
+              <Button onClick={() => handleView(resource)}>
                 View
-              </button>
+              </Button>
             </div>
           </li>
         ))}
